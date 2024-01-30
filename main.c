@@ -1,5 +1,5 @@
 /* main v9*/
-
+// outra
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
