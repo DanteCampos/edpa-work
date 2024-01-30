@@ -1,279 +1,249 @@
-/* main v9*/
-// outra1
 #include <stdio.h>
-#include <string.h>
 #include <stdlib.h>
 #include <time.h>
+#include <limits.h>
 
-#include "cartesian_tree.h"
+#include "bst.c"
+#include "avl.c"
+#include "treap.c"
 
-#include <stdio.h> // for printf
-#include <stdlib.h> // for calloc, malloc and free
-#include <string.h> // for strcmp
-
-// using struct to package all information into a single variable
-typedef struct
-{
-    char **list;
-    int length;
-} string_list;
-
-// if you are planning on using several lists, it's better to create an init function
-void init(string_list *list)
-{
-    list->list = calloc(1, sizeof(char *));
-    list->length = 0;
-}
-
-/*void convert(pNODE T, string_list *list) // converte char em long.
-{
-    long numero;
-    
-    for (int i = 0; i < list->length; i++){
-    char * my_char = list->list[i];
-    numero = strtol(my_char, NULL, 10);
-    insert(T, numero, NULL);
-    }
-}*/
-
-void append_item(string_list *list, char *string) // note that I am using "string_list *" instead of just "string_list".
-{
-    // it is okay to use a fixed-sized array here because it is a temporary array
-    char *temp_array[list->length + 1]; // + 1 is for a new element
-
-    // adding the list->list elements to the temp_array
-    for (int i = 0; i < list->length; i++)
-    {
-        temp_array[i] = list->list[i];
-    }
-
-    // adding the new element to the temp_array
-    temp_array[list->length] = string; // 0 is the first number, that's why "list->length" instead of "list->length + 1"
-
-    // freeing the list->list (it should be allocated to make this function work)
-    free(list->list);
-
-    // allocating memory for list->list
-    list->list = calloc(list->length + 1, sizeof(char *)); // I am using calloc instead of malloc here because it just makes the code cleaner, apart from that there is no difference between them
-
-    // adding elements from temp_array to list->list
-    for (int i = 0; i < list->length + 1; i++)
-    {
-        list->list[i] = temp_array[i];
-    }
-
-    list->length++;
-}
-
-void remove_item(string_list *list, char *string) // note that I am using "string_list *" instead of just "string_list".
-{
-    // it is okay to use a fixed-sized array here because it is a temporary array
-    char *temp_array[list->length]; // without "-1" because it is uncertain if the list includes the element
-    // a variable for tracking, whether or not the list includes the element; set to "false" by default
-    int found = 0;
-
-    // adding all elements from list->list to temp_array, except the one that should be removed
-    for (int i = 0; i < list->length; i++)
-    {
-        // if the element is not the one that should be removed
-        if (strcmp(list->list[i], string) != 0)
-        {
-            temp_array[i] = list->list[i];
-        }
-        else
-        {
-            found = 1;
+void shuffle(long* array, long n_elements, long seed) {
+    srand(seed);
+    if (n_elements > 1) {
+        for (long i = 0; i < n_elements - 1; i++) {
+            long j = i + rand() / (RAND_MAX / (n_elements - i) + 1);
+            long t = array[j];
+            array[j] = array[i];
+            array[i] = t;
         }
     }
+}
 
-    // if not found there is no point of doing the following
-    if (found)
-    {
-        // freeing the list->list (it should be allocated to make this function work)
-        free(list->list);
-
-        // allocating memory for list->list
-        list->list = calloc(list->length - 1, sizeof(char *)); // I am using calloc instead of malloc here because it just makes the code cleaner, apart from that there is no difference between them
-
-        // adding elements from temp_array to list->list
-        for (int i = 0; i < list->length - 1; i++)
-        {
-            list->list[i] = temp_array[i];
-        }
-
-        list->length--;
+long* generateRandomArray(long n_elements, long seed){
+    long* array = (long*) malloc(n_elements * sizeof(long));
+    srand(seed);
+    for (long i = 0; i < n_elements; i++){
+        array[i] = rand() % LONG_MAX; // random values
     }
+    shuffle(array, n_elements, seed); // shuffle the array
+    return array;
 }
 
-int main() {
-/*FILE *fpt, *fpt_add, *fpt_remove;*/
-
-int randomized_int = 0;
-char * my_char = "0";
-long numero = 0;
-double float_seconds = 0;
-clock_t start = 0, end = 0;
-
-pNODE T = construct_tree();
-
-string_list list;
-
-// note that I am passing to the functions the pointer to the list, not the list itself
-init(&list);
-
-
-append_item(&list, "1");
-append_item(&list, "2");
-append_item(&list, "3");
-append_item(&list, "4");
-append_item(&list, "5");
-
-
-/*Adiciona a Arvore*/
-for (int i = 0; i < list.length; i++){
-    printf("----%d-----\n",i);
-    my_char = list.list[i];
-    numero = strtol(my_char, NULL, 10);
-    start = clock();
-    if(insert(T, numero, NULL)){
-        end = clock();
-        float_seconds = ((float)(end - start)) / CLOCKS_PER_SEC;
-        printf("%s \t %f \t Encontrado\n",my_char,float_seconds);
-    }  else{
-        end = clock();
-        float_seconds = ((float)(end - start)) / CLOCKS_PER_SEC;
-        printf("%s \t %f \t Sem Correspondencia\n",my_char,float_seconds);
+long* generateRandomOrder(long n_elements, long seed){
+    long* order = (long*) malloc(n_elements * sizeof(long));
+    srand(seed);
+    for (long i = 0; i < n_elements; i++){
+        order[i] = i; // indices from 0 to n_elements - 1
     }
+    shuffle(order, n_elements, seed); // shuffle the array
+    return order;
+}
+
+int main(){
+    int n_steps = 1e1; // 1e3 when doing the real experiment
+    int operations_per_step = 1e6; // Must be high to obtain accurated time measurements
+    int n_nodes = n_steps*operations_per_step; // Each operation happens to one single node
+    int seed = 0;
+
+    long *keys, *prior, *order;
+    struct timespec start, end;
+    FILE *fp; // To save results
+
+    // Time (ms) for each operation
+    double *timeTreapInsert,*timeTreapSearch, *timeTreapRemove, *timeTreapSearchAfterInsertion, *timeTreapSearchAfterRemoval,
+           *timeBstInsert, *timeBstSearch, *timeBstRemove, *timeBstSearchAfterInsertion, *timeBstSearchAfterRemoval,
+           *timeAvlInsert, *timeAvlSearch, *timeAvlRemove, *timeAvlSearchAfterInsertion, *timeAvlSearchAfterRemoval;
+
+    // ----------------------------- EXPERIMENT -----------------------------
+
+    // Generate random keys and priorities
+    keys  = generateRandomArray(n_nodes, seed++);
+    prior = generateRandomArray(n_nodes, seed++);
+
+    // Allocate the time arrays
+    timeTreapInsert = (double*) malloc(n_steps * sizeof(double));
+    timeTreapSearch = (double*) malloc(n_steps * sizeof(double));
+    timeTreapRemove = (double*) malloc(n_steps * sizeof(double));
+    timeTreapSearchAfterInsertion = (double*) malloc(n_steps * sizeof(double));
+    timeTreapSearchAfterRemoval = (double*) malloc(n_steps * sizeof(double));
+    timeBstInsert = (double*) malloc(n_steps * sizeof(double));
+    timeBstSearch = (double*) malloc(n_steps * sizeof(double));
+    timeBstRemove = (double*) malloc(n_steps * sizeof(double));
+    timeBstSearchAfterInsertion = (double*) malloc(n_steps * sizeof(double));
+    timeBstSearchAfterRemoval = (double*) malloc(n_steps * sizeof(double));
+    timeAvlInsert = (double*) malloc(n_steps * sizeof(double));
+    timeAvlSearch = (double*) malloc(n_steps * sizeof(double));
+    timeAvlRemove = (double*) malloc(n_steps * sizeof(double));
+    timeAvlSearchAfterInsertion = (double*) malloc(n_steps * sizeof(double));
+    timeAvlSearchAfterRemoval = (double*) malloc(n_steps * sizeof(double));
     
-}
+    // Initialize the treap
+    pTNODE root = NULL;
+    pBNODE bstRoot = NULL;
+    pANODE avlRoot = NULL;
 
+    // Insert and search
+    order = generateRandomOrder(n_nodes, seed++);
+    for (int j = 0; j < n_steps; j++){
+        printf("Insertion step %d of %d\n", j+1, n_steps);
+
+        // Treap insertion
+        clock_gettime(CLOCK_MONOTONIC, &start);
+        for (int i = j*operations_per_step; i < (j+1)*operations_per_step; i++)
+            treapInsert(keys[i], prior[i], &root);
+        clock_gettime(CLOCK_MONOTONIC, &end);
+        timeTreapInsert[j] = ((end.tv_sec - start.tv_sec) * 1e9 + (end.tv_nsec - start.tv_nsec))/1e6;
+
+        // Treap search after insertion
+        clock_gettime(CLOCK_MONOTONIC, &start);
+        for (int i = j*operations_per_step; i < (j+1)*operations_per_step; i++)
+            treapSearch(keys[i], root);
+        clock_gettime(CLOCK_MONOTONIC, &end);
+        timeTreapSearchAfterInsertion[j] = ((end.tv_sec - start.tv_sec) * 1e9 + (end.tv_nsec - start.tv_nsec))/1e6;
+
+        // BST insertion
+        clock_gettime(CLOCK_MONOTONIC, &start);
+        for (int i = j*operations_per_step; i < (j+1)*operations_per_step; i++)
+            bstInsert(keys[i], &bstRoot);
+        clock_gettime(CLOCK_MONOTONIC, &end);
+        timeBstInsert[j] = ((end.tv_sec - start.tv_sec) * 1e9 + (end.tv_nsec - start.tv_nsec))/1e6;
+
+        // BST search after insertion
+        clock_gettime(CLOCK_MONOTONIC, &start);
+        for (int i = j*operations_per_step; i < (j+1)*operations_per_step; i++)
+            bstSearch(keys[i], bstRoot);
+        clock_gettime(CLOCK_MONOTONIC, &end);
+        timeBstSearchAfterInsertion[j] = ((end.tv_sec - start.tv_sec) * 1e9 + (end.tv_nsec - start.tv_nsec))/1e6;
+
+        // AVL insertion
+        clock_gettime(CLOCK_MONOTONIC, &start);
+        for (int i = j*operations_per_step; i < (j+1)*operations_per_step; i++)
+            avlInsert(keys[i], &avlRoot);
+        clock_gettime(CLOCK_MONOTONIC, &end);
+        timeAvlInsert[j] = ((end.tv_sec - start.tv_sec) * 1e9 + (end.tv_nsec - start.tv_nsec))/1e6;
+
+        // AVL search after insertion
+        clock_gettime(CLOCK_MONOTONIC, &start);
+        for (int i = j*operations_per_step; i < (j+1)*operations_per_step; i++)
+            avlSearch(keys[i], avlRoot);
+        clock_gettime(CLOCK_MONOTONIC, &end);
+        timeAvlSearchAfterInsertion[j] = ((end.tv_sec - start.tv_sec) * 1e9 + (end.tv_nsec - start.tv_nsec))/1e6;
+    }
+    free(order);
+
+    // Batch search
+    order = generateRandomOrder(n_nodes, seed++);
+    for (int j = 0; j < n_steps; j++){
+        printf("Search step %d of %d\n", j+1, n_steps);
+
+        // Treap search
+        clock_gettime(CLOCK_MONOTONIC, &start);
+        for (int i = 0; i < n_nodes; i++)
+            treapSearch(keys[i], root);
+        clock_gettime(CLOCK_MONOTONIC, &end);
+        timeTreapSearch[j] = ((end.tv_sec - start.tv_sec) * 1e9 + (end.tv_nsec - start.tv_nsec))/1e6;
+
+        // BST search
+        clock_gettime(CLOCK_MONOTONIC, &start);
+        for (int i = 0; i < n_nodes; i++)
+            bstSearch(keys[i], bstRoot);
+        clock_gettime(CLOCK_MONOTONIC, &end);
+        timeBstSearch[j] = ((end.tv_sec - start.tv_sec) * 1e9 + (end.tv_nsec - start.tv_nsec))/1e6;
+
+        // AVL search
+        clock_gettime(CLOCK_MONOTONIC, &start);
+        for (int i = 0; i < n_nodes; i++)
+            avlSearch(keys[i], avlRoot);
+        clock_gettime(CLOCK_MONOTONIC, &end);
+        timeAvlSearch[j] = ((end.tv_sec - start.tv_sec) * 1e9 + (end.tv_nsec - start.tv_nsec))/1e6;
+    }
+    free(order);
+
+    // Remove and search
+    order = generateRandomOrder(n_nodes, seed++);
+    for (int j = 0; j < n_steps; j++){
+        printf("Removal step %d of %d\n", j+1, n_steps);
+
+        // Treap removal
+        clock_gettime(CLOCK_MONOTONIC, &start);
+        for (int i = 0; i < n_nodes; i++)
+            treapRemove(keys[i], &root);
+        clock_gettime(CLOCK_MONOTONIC, &end);
+        timeTreapRemove[j] = ((end.tv_sec - start.tv_sec) * 1e9 + (end.tv_nsec - start.tv_nsec))/1e6;
+
+        // Treap search after removal
+        clock_gettime(CLOCK_MONOTONIC, &start);
+        for (int i = 0; i < n_nodes; i++)
+            treapSearch(keys[i], root);
+        clock_gettime(CLOCK_MONOTONIC, &end);
+        timeTreapSearchAfterRemoval[j] = ((end.tv_sec - start.tv_sec) * 1e9 + (end.tv_nsec - start.tv_nsec))/1e6;
+
+        // BST removal
+        clock_gettime(CLOCK_MONOTONIC, &start);
+        for (int i = 0; i < n_nodes; i++)
+            bstRemove(keys[i], &bstRoot);
+        clock_gettime(CLOCK_MONOTONIC, &end);
+        timeBstRemove[j] = ((end.tv_sec - start.tv_sec) * 1e9 + (end.tv_nsec - start.tv_nsec))/1e6;
+
+        // BST search after removal
+        clock_gettime(CLOCK_MONOTONIC, &start);
+        for (int i = 0; i < n_nodes; i++)
+            bstSearch(keys[i], bstRoot);
+        clock_gettime(CLOCK_MONOTONIC, &end);
+        timeBstSearchAfterRemoval[j] = ((end.tv_sec - start.tv_sec) * 1e9 + (end.tv_nsec - start.tv_nsec))/1e6;
+
+        // AVL removal
+        clock_gettime(CLOCK_MONOTONIC, &start);
+        for (int i = 0; i < n_nodes; i++)
+            avlRemove(keys[i], &avlRoot);
+        clock_gettime(CLOCK_MONOTONIC, &end);
+        timeAvlRemove[j] = ((end.tv_sec - start.tv_sec) * 1e9 + (end.tv_nsec - start.tv_nsec))/1e6;
+
+        // AVL search after removal
+        clock_gettime(CLOCK_MONOTONIC, &start);
+        for (int i = 0; i < n_nodes; i++)
+            avlSearch(keys[i], avlRoot);
+        clock_gettime(CLOCK_MONOTONIC, &end);
+        timeAvlSearchAfterRemoval[j] = ((end.tv_sec - start.tv_sec) * 1e9 + (end.tv_nsec - start.tv_nsec))/1e6;
+    }
+    free(order);
     
-/*Lookup*/
-for (int i = 0; i < list.length; i++){
-    my_char = list.list[i];
-    numero = strtol(my_char, NULL, 10);
-    
-    start = clock();
-    find(T, numero);
-    end = clock();
-    
-    double float_seconds = ((float)(end - start)) / CLOCKS_PER_SEC;
-    if(find(T, numero)){
-        printf("%s \t %f \t Encontrado\n", my_char,float_seconds);
-    }  else {
-        printf("%s \t %f \t Sem Correspondencia\n",my_char,float_seconds);
-}
+    // Save results
+    fp = fopen("results.csv", "w");
+    fprintf(fp,
+        "treap_insert,treap_search_after_insertion,treap_remove,treap_search_after_removal,treap_search"
+        "bst_insert,bst_search_after_insertion,bst_remove,bst_search_after_removal,bst_search"
+        "avl_insert,avl_search_after_insertion,avl_remove,avl_search_after_removal,avl_search"
+        "\n"
+    );
+    for (int i = 0; i < n_steps; i++){
+        fprintf(fp, "%lf,%lf,%lf,%lf,%lf,%lf,%lf,%lf,%lf,%lf,%lf,%lf,%lf,%lf,%lf\n",
+            timeTreapInsert[i], timeTreapSearchAfterInsertion[i], timeTreapRemove[i], timeTreapSearchAfterRemoval[i], timeTreapSearch[i],
+            timeBstInsert[i], timeBstSearchAfterInsertion[i], timeBstRemove[i], timeBstSearchAfterRemoval[i], timeBstSearch[i],
+            timeAvlInsert[i], timeAvlSearchAfterInsertion[i], timeAvlRemove[i], timeAvlSearchAfterRemoval[i], timeAvlSearch[i]
+        );
+    }
+    fclose(fp);
 
-}
+    // Free time arrays
+    free(timeTreapInsert);
+    free(timeTreapRemove);
+    free(timeTreapSearch);
+    free(timeTreapSearchAfterInsertion);
+    free(timeTreapSearchAfterRemoval);
+    free(timeBstInsert);
+    free(timeBstRemove);
+    free(timeBstSearch);
+    free(timeBstSearchAfterInsertion);
+    free(timeBstSearchAfterRemoval);
+    free(timeAvlInsert);
+    free(timeAvlRemove);
+    free(timeAvlSearch);
+    free(timeAvlSearchAfterInsertion);
+    free(timeAvlSearchAfterRemoval);
 
-/*Exclui*/
-
-for (int i = 0; i < list.length; i++){
-    randomized_int = rand() % list.length;
-    printf("========");
-    printf("%d \n",i);
-    my_char = list.list[randomized_int];
-    numero = strtol(my_char, NULL, 10);
-    remove_item(&list, my_char);
-    printf("%d \n",randomized_int);
-    start = clock();
-    if(!erase(T, numero)){
-    end = clock();
-    float_seconds = ((float)(end - start)) / CLOCKS_PER_SEC;
-    printf("%s \t %f \t Encontrado\n",my_char,float_seconds);
-    } else{
-    end = clock();
-    float_seconds = ((float)(end - start)) / CLOCKS_PER_SEC;
-    printf("%s \t %f \t Sem Correspondencia\n",my_char,float_seconds);
-}
-
-}
-
-
-free(list.list);
-destruct_tree(T);
-
-}
-
-
-/*for (int i = 0; i < list.length; i++){
-    fprintf(fpt, "%s\n", list.list[i]);
-}
-
-printf("----------------\n");
-
-remove_item(&list, "another string");
-
-for (int i = 0; i < list.length; i++){
-    fprintf(fpt, "%s\n", list.list[i]);
-}
-    
-
-    // don't forget to free the list after usage
-free(list.list);
-
+    // Free keys and priorities
+    free (keys);
+    free (prior);
     return 0;
 }
-    
-  
-/*  char buf[10];
-  pNODE T = construct_tree();
-  long key;
-
-  printf("Usage:\nadd <key>\nremove <key>\nlookup <key>\n\n");
-
- while(1) {
-    /* dealing with user */
-/*    scanf("%s %ld", buf, &key);
-
-    if(!strcmp(buf, "add")) {
-      if(!insert(T, key, NULL))
-    puts("Inserted, OK.");
-      else
-    puts("Ooops, a duplicate detected.");
-    }
-    else if(!strcmp(buf, "remove")) {
-      if(!erase(T, key))
-    puts("Found and erased, OK.");
-      else
-    puts("No such element.");
-    }
-    else if(!strcmp(buf, "lookup")) {
-      if(find(T, key))
-    puts("Yup, found.");
-      else
-    puts("Not found.");
-    } else {
-      destruct_tree(T);
-      puts("Bye!");
-      exit(0);
-    }
-  }
-}
-
-
-
-
-
-/* Contar Tempo:
-clock_t start = clock();
-/*Do something*/
-/*clock_t end = clock();
-float seconds = (float)(end - start) / CLOCKS_PER_SEC;'
-
-/* main */
-
-
-/*
-
-int main()
-{
-FILE *fpt;
-
-fpt = fopen("MyFile.csv", "w+");
-
-fprintf(fpt,"ID, Name, Email, Phone Number\n");
-
-fclose(fpt);
-}
-*/
