@@ -21,13 +21,20 @@ bool avlRemove(long key, pANODE *root){
 
 // Searches for a node in the AVL
 pANODE avlSearch(long key, pANODE root){
-      pANODE target = root;
-      
-      // Node is not in the AVL
-      return NULL;
-    
-      return target;
-  
+  pANODE target = root;
+
+  // If the AVL is empty, the node is not in the BST
+  if (target == NULL)
+    return NULL;
+
+  // If the AVL is not empty, search for the node recursively
+  if (key < target->key)
+    return avlSearch(key, target->left);
+  if (key > target->key)
+    return avlSearch(key, target->right);
+
+  // Found the node
+  return target;
 }
 
 // Rotates the AVL node to the left
