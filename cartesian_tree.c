@@ -2,7 +2,7 @@
 
 #include "cartesian_tree.h"
 
-
+/*eae*/
 
 pNODE construct_tree(void) {
   srand(time(0));   /* treap is a randomized data structure, remember? */
