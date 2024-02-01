@@ -40,8 +40,8 @@ long* generateRandomOrder(long n_elements, long seed){
 }
 
 int main(){
-    int n_steps = 1e1; // 1e3 when doing the real experiment
-    int operations_per_step = 1e6; // Must be high to obtain accurated time measurements
+    int n_steps = 1e2; // Number of batches of operations
+    int operations_per_step = 1e5; // Must be high to obtain accurated time measurements
     int n_nodes = n_steps*operations_per_step; // Each operation happens to one single node
     int seed = 0;
 
