@@ -3,27 +3,22 @@
 
 #include <stdbool.h>
 
+struct AvlNode {
+  long key;
+  struct AvlNode *left, *right;
+  int height;
+};
+
 #define  ANODE  struct AvlNode
 #define pANODE  struct AvlNode*
 
-struct AvlNode {
-  long key;
-  ANODE *left, *right;
-};
-
 // Inserts a new node into the AVL
-bool avlInsert(long key, pANODE *root);
+pANODE avlInsert(long key, pANODE node);
 
 // Removes a node from the AVL
-bool avlRemove(long key, pANODE *root);
+pANODE avlRemove(long key, pANODE root);
 
 // Searches for a node in the AVL
 pANODE avlSearch(long key, pANODE root);
-
-// Rotates the AVL node to the left
-void avlRotateLeft(pANODE *root);
-
-// Rotates the AVL node to the right
-void avlRotateRight(pANODE *root);
 
 #endif

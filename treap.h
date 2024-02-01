@@ -3,13 +3,13 @@
 
 #include <stdbool.h>
 
-#define  TNODE  struct TreapNode
-#define pTNODE  struct TreapNode*
-
 struct TreapNode {
   long key, priority;
-  TNODE *left, *right;
+  struct TreapNode *left, *right;
 };
+
+#define  TNODE  struct TreapNode
+#define pTNODE  struct TreapNode*
 
 // Inserts a new node into the treap
 bool treapInsert(long key, long priority, pTNODE *root);
@@ -19,11 +19,5 @@ bool treapRemove(long key, pTNODE *root);
 
 // Searches for a node in the treap
 pTNODE treapSearch(long key, pTNODE root);
-
-// Rotates the treap node to the left
-void treapRotateLeft(pTNODE *root);
-
-// Rotates the treap node to the right
-void treapRotateRight(pTNODE *root);
 
 #endif

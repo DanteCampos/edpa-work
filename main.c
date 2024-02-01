@@ -118,7 +118,7 @@ int main(){
         // AVL insertion
         clock_gettime(CLOCK_MONOTONIC, &start);
         for (int i = j*operations_per_step; i < (j+1)*operations_per_step; i++)
-            avlInsert(keys[i], &avlRoot);
+            avlRoot = avlInsert(keys[i], avlRoot);
         clock_gettime(CLOCK_MONOTONIC, &end);
         timeAvlInsert[j] = ((end.tv_sec - start.tv_sec) * 1e9 + (end.tv_nsec - start.tv_nsec))/1e6;
 
@@ -195,7 +195,7 @@ int main(){
         // AVL removal
         clock_gettime(CLOCK_MONOTONIC, &start);
         for (int i = 0; i < n_nodes; i++)
-            avlRemove(keys[i], &avlRoot);
+            avlRoot = avlRemove(keys[i], avlRoot);
         clock_gettime(CLOCK_MONOTONIC, &end);
         timeAvlRemove[j] = ((end.tv_sec - start.tv_sec) * 1e9 + (end.tv_nsec - start.tv_nsec))/1e6;
 
@@ -211,8 +211,8 @@ int main(){
     // Save results
     fp = fopen("results.csv", "w");
     fprintf(fp,
-        "treap_insert,treap_search_after_insertion,treap_remove,treap_search_after_removal,treap_search"
-        "bst_insert,bst_search_after_insertion,bst_remove,bst_search_after_removal,bst_search"
+        "treap_insert,treap_search_after_insertion,treap_remove,treap_search_after_removal,treap_search,"
+        "bst_insert,bst_search_after_insertion,bst_remove,bst_search_after_removal,bst_search,"
         "avl_insert,avl_search_after_insertion,avl_remove,avl_search_after_removal,avl_search"
         "\n"
     );
