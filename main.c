@@ -78,9 +78,9 @@ int main(){
     timeAvlSearchAfterRemoval = (double*) malloc(n_steps * sizeof(double));
     
     // Initialize the treap
-    pTNODE root = NULL;
-    pBNODE bstRoot = NULL;
-    pANODE avlRoot = NULL;
+    pTNODE treap_root = NULL;
+    pBNODE bst_root = NULL;
+    pANODE avl_root = NULL;
 
     // Insert and search
     order = generateRandomOrder(n_nodes, seed++);
@@ -90,42 +90,42 @@ int main(){
         // Treap insertion
         clock_gettime(CLOCK_MONOTONIC, &start);
         for (int i = j*operations_per_step; i < (j+1)*operations_per_step; i++)
-            treapInsert(keys[i], prior[i], &root);
+            treapInsert(keys[i], prior[i], &treap_root);
         clock_gettime(CLOCK_MONOTONIC, &end);
         timeTreapInsert[j] = ((end.tv_sec - start.tv_sec) * 1e9 + (end.tv_nsec - start.tv_nsec))/1e6;
 
         // Treap search after insertion
         clock_gettime(CLOCK_MONOTONIC, &start);
         for (int i = j*operations_per_step; i < (j+1)*operations_per_step; i++)
-            treapSearch(keys[i], root);
+            treapSearch(keys[i], treap_root);
         clock_gettime(CLOCK_MONOTONIC, &end);
         timeTreapSearchAfterInsertion[j] = ((end.tv_sec - start.tv_sec) * 1e9 + (end.tv_nsec - start.tv_nsec))/1e6;
 
         // BST insertion
         clock_gettime(CLOCK_MONOTONIC, &start);
         for (int i = j*operations_per_step; i < (j+1)*operations_per_step; i++)
-            bstInsert(keys[i], &bstRoot);
+            bstInsert(keys[i], &bst_root);
         clock_gettime(CLOCK_MONOTONIC, &end);
         timeBstInsert[j] = ((end.tv_sec - start.tv_sec) * 1e9 + (end.tv_nsec - start.tv_nsec))/1e6;
 
         // BST search after insertion
         clock_gettime(CLOCK_MONOTONIC, &start);
         for (int i = j*operations_per_step; i < (j+1)*operations_per_step; i++)
-            bstSearch(keys[i], bstRoot);
+            bstSearch(keys[i], bst_root);
         clock_gettime(CLOCK_MONOTONIC, &end);
         timeBstSearchAfterInsertion[j] = ((end.tv_sec - start.tv_sec) * 1e9 + (end.tv_nsec - start.tv_nsec))/1e6;
 
         // AVL insertion
         clock_gettime(CLOCK_MONOTONIC, &start);
         for (int i = j*operations_per_step; i < (j+1)*operations_per_step; i++)
-            avlRoot = avlInsert(keys[i], avlRoot);
+            avl_root = avlInsert(keys[i], avl_root);
         clock_gettime(CLOCK_MONOTONIC, &end);
         timeAvlInsert[j] = ((end.tv_sec - start.tv_sec) * 1e9 + (end.tv_nsec - start.tv_nsec))/1e6;
 
         // AVL search after insertion
         clock_gettime(CLOCK_MONOTONIC, &start);
         for (int i = j*operations_per_step; i < (j+1)*operations_per_step; i++)
-            avlSearch(keys[i], avlRoot);
+            avlSearch(keys[i], avl_root);
         clock_gettime(CLOCK_MONOTONIC, &end);
         timeAvlSearchAfterInsertion[j] = ((end.tv_sec - start.tv_sec) * 1e9 + (end.tv_nsec - start.tv_nsec))/1e6;
     }
@@ -139,21 +139,21 @@ int main(){
         // Treap search
         clock_gettime(CLOCK_MONOTONIC, &start);
         for (int i = 0; i < n_nodes; i++)
-            treapSearch(keys[i], root);
+            treapSearch(keys[i], treap_root);
         clock_gettime(CLOCK_MONOTONIC, &end);
         timeTreapSearch[j] = ((end.tv_sec - start.tv_sec) * 1e9 + (end.tv_nsec - start.tv_nsec))/1e6;
 
         // BST search
         clock_gettime(CLOCK_MONOTONIC, &start);
         for (int i = 0; i < n_nodes; i++)
-            bstSearch(keys[i], bstRoot);
+            bstSearch(keys[i], bst_root);
         clock_gettime(CLOCK_MONOTONIC, &end);
         timeBstSearch[j] = ((end.tv_sec - start.tv_sec) * 1e9 + (end.tv_nsec - start.tv_nsec))/1e6;
 
         // AVL search
         clock_gettime(CLOCK_MONOTONIC, &start);
         for (int i = 0; i < n_nodes; i++)
-            avlSearch(keys[i], avlRoot);
+            avlSearch(keys[i], avl_root);
         clock_gettime(CLOCK_MONOTONIC, &end);
         timeAvlSearch[j] = ((end.tv_sec - start.tv_sec) * 1e9 + (end.tv_nsec - start.tv_nsec))/1e6;
     }
@@ -167,42 +167,42 @@ int main(){
         // Treap removal
         clock_gettime(CLOCK_MONOTONIC, &start);
         for (int i = 0; i < n_nodes; i++)
-            treapRemove(keys[i], &root);
+            treapRemove(keys[i], &treap_root);
         clock_gettime(CLOCK_MONOTONIC, &end);
         timeTreapRemove[j] = ((end.tv_sec - start.tv_sec) * 1e9 + (end.tv_nsec - start.tv_nsec))/1e6;
 
         // Treap search after removal
         clock_gettime(CLOCK_MONOTONIC, &start);
         for (int i = 0; i < n_nodes; i++)
-            treapSearch(keys[i], root);
+            treapSearch(keys[i], treap_root);
         clock_gettime(CLOCK_MONOTONIC, &end);
         timeTreapSearchAfterRemoval[j] = ((end.tv_sec - start.tv_sec) * 1e9 + (end.tv_nsec - start.tv_nsec))/1e6;
 
         // BST removal
         clock_gettime(CLOCK_MONOTONIC, &start);
         for (int i = 0; i < n_nodes; i++)
-            bstRemove(keys[i], &bstRoot);
+            bstRemove(keys[i], &bst_root);
         clock_gettime(CLOCK_MONOTONIC, &end);
         timeBstRemove[j] = ((end.tv_sec - start.tv_sec) * 1e9 + (end.tv_nsec - start.tv_nsec))/1e6;
 
         // BST search after removal
         clock_gettime(CLOCK_MONOTONIC, &start);
         for (int i = 0; i < n_nodes; i++)
-            bstSearch(keys[i], bstRoot);
+            bstSearch(keys[i], bst_root);
         clock_gettime(CLOCK_MONOTONIC, &end);
         timeBstSearchAfterRemoval[j] = ((end.tv_sec - start.tv_sec) * 1e9 + (end.tv_nsec - start.tv_nsec))/1e6;
 
         // AVL removal
         clock_gettime(CLOCK_MONOTONIC, &start);
         for (int i = 0; i < n_nodes; i++)
-            avlRoot = avlRemove(keys[i], avlRoot);
+            avl_root = avlRemove(keys[i], avl_root);
         clock_gettime(CLOCK_MONOTONIC, &end);
         timeAvlRemove[j] = ((end.tv_sec - start.tv_sec) * 1e9 + (end.tv_nsec - start.tv_nsec))/1e6;
 
         // AVL search after removal
         clock_gettime(CLOCK_MONOTONIC, &start);
         for (int i = 0; i < n_nodes; i++)
-            avlSearch(keys[i], avlRoot);
+            avlSearch(keys[i], avl_root);
         clock_gettime(CLOCK_MONOTONIC, &end);
         timeAvlSearchAfterRemoval[j] = ((end.tv_sec - start.tv_sec) * 1e9 + (end.tv_nsec - start.tv_nsec))/1e6;
     }
